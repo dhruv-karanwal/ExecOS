@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ExecOS Project Report</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --ink: #0F172A; --ink-2: #334155; --muted: #64748B; --line: #E2E8F0; --soft: #F1F5F9;
+    --primary: #1E293B; --accent: #2563EB; --accent-soft: #EFF6FF; --ok: #15803D; --ok-soft: #F0FDF4; --warn: #B45309; --warn-soft: #FFFBEB;
+  }
+  @page { size: A4; margin: 16mm 14mm 18mm 14mm; }
+  @page cover { margin: 0; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "IBM Plex Sans", "Segoe UI", sans-serif; font-size: 10.2pt; line-height: 1.55; color: var(--ink); background: #fff; }
+  .mono, code, .eyebrow, th { font-family: "JetBrains Mono", Consolas, monospace; }
+  code { font-size: 8.6pt; background: var(--soft); border: 1px solid var(--line); border-radius: 3px; padding: 0 3px; color: var(--ink-2); }
+  pre { font-family: "JetBrains Mono", Consolas, monospace; font-size: 8.4pt; line-height: 1.5; background: var(--primary); color: #E2E8F0; border-radius: 6px; padding: 10px 12px; white-space: pre-wrap; break-inside: avoid; }
+  h1, h2, h3 { line-height: 1.2; color: var(--ink); }
+  h1 { font-size: 21pt; margin: 0 0 4mm; padding-bottom: 3mm; border-bottom: 2px solid var(--ink); break-after: avoid; }
+  h2 { font-size: 13.5pt; margin: 7mm 0 2mm; break-after: avoid; }
+  h3 { font-size: 11pt; margin: 4mm 0 1mm; break-after: avoid; }
+  p { margin: 0 0 2.5mm; }
+  ul { margin: 0 0 3mm; padding-left: 5mm; }
+  li { margin-bottom: 0.8mm; }
+  .chapter { break-before: page; }
+  .eyebrow { break-after: avoid; font-size: 7.5pt; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); font-weight: 600; margin-bottom: 1.5mm; }
+  .lead { font-size: 11pt; color: var(--ink-2); }
+
+  /* cover */
+  .cover { page: cover; height: 297mm; width: 210mm; background: var(--primary); color: #F8FAFC; padding: 30mm 22mm 20mm; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+  .cover::after { content: ""; position: absolute; right: -60mm; top: -40mm; width: 180mm; height: 180mm; border-radius: 50%; border: 22mm solid rgba(37,99,235,.18); }
+  .cover .logo { width: 18mm; height: 18mm; border-radius: 4mm; background: var(--accent); display: grid; place-items: center; font: 700 22pt "IBM Plex Sans"; color: #fff; margin-bottom: 14mm; }
+  .cover .eyebrow { color: #93C5FD; }
+  .cover h1 { font-size: 40pt; border: 0; color: #fff; margin: 0 0 4mm; padding: 0; }
+  .cover .tag { font-size: 14pt; color: #CBD5E1; max-width: 140mm; margin-bottom: 14mm; }
+  .cover-shot { width: 100%; border-radius: 3mm; border: 1px solid #334155; box-shadow: 0 8mm 20mm rgba(0,0,0,.4); position: relative; z-index: 1; }
+  .cover .meta { margin-top: auto; display: flex; gap: 12mm; font-size: 9pt; color: #94A3B8; border-top: 1px solid #334155; padding-top: 5mm; }
+  .cover .meta b { display: block; color: #F8FAFC; font-weight: 600; font-size: 10pt; }
+
+  /* stats + cards */
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 3mm; margin: 4mm 0 5mm; }
+  .stat { border: 1px solid var(--line); border-radius: 2mm; padding: 3mm; background: var(--soft); }
+  .stat b { display: block; font: 700 18pt "IBM Plex Sans"; color: var(--accent); line-height: 1.1; }
+  .stat span { font-size: 8.4pt; color: var(--ink-2); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+  .card { border: 1px solid var(--line); border-radius: 2mm; padding: 3mm 4mm; break-inside: avoid; }
+  .card h3 { margin-top: 0; }
+  .note { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 2.5mm 4mm; border-radius: 0 2mm 2mm 0; margin: 3mm 0; break-inside: avoid; }
+  .note.warn { border-color: var(--warn); background: var(--warn-soft); }
+  .note.ok { border-color: var(--ok); background: var(--ok-soft); }
+  .pill { display: inline-block; font: 500 7.6pt "JetBrains Mono"; border: 1px solid var(--line); background: var(--soft); border-radius: 10px; padding: 0 2.2mm; margin: 0 1mm 1mm 0; color: var(--ink-2); }
+
+  /* tables */
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 8.8pt; break-inside: auto; }
+  th { text-align: left; font-size: 7.4pt; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); border-bottom: 1.5px solid var(--ink); padding: 1.6mm 2mm; }
+  td { border-bottom: 1px solid var(--line); padding: 1.6mm 2mm; vertical-align: top; }
+  tr { break-inside: avoid; }
+  td code { white-space: nowrap; }
+
+  /* figures */
+  figure { margin: 3mm 0 5mm; break-inside: avoid; }
+  figure img { display: block; width: 100%; max-height: 200mm; width: auto; max-width: 100%; margin: 0 auto; object-fit: contain; border: 1px solid #CBD5E1; border-radius: 1.5mm; background: #0F172A; }
+  figure.s img { width: 86%; }
+  figcaption { font-size: 8.4pt; color: var(--muted); margin-top: 1.5mm; }
+  figcaption b { color: var(--ink); font-family: "JetBrains Mono", monospace; font-weight: 600; }
+  .feature { break-inside: avoid; }
+
+  /* TOC */
+  .toc ol { list-style: none; padding: 0; margin: 0; counter-reset: c; }
+  .toc li { counter-increment: c; display: flex; gap: 3mm; padding: 2mm 0; border-bottom: 1px solid var(--line); font-size: 10.5pt; }
+  .toc li::before { content: counter(c, decimal-leading-zero); font: 600 9pt "JetBrains Mono"; color: var(--accent); width: 8mm; padding-top: .5mm; }
+  .toc li span { color: var(--muted); font-size: 9pt; margin-left: auto; }
+
+  /* architecture diagram */
+  .arch { display: grid; grid-template-columns: 1fr 14mm 1fr 14mm 1fr; align-items: stretch; margin: 4mm 0; break-inside: avoid; }
+  .arch .box { border: 1.5px solid var(--ink); border-radius: 2mm; padding: 3mm; font-size: 8.6pt; background: #fff; }
+  .arch .box b { display: block; font-size: 9.6pt; margin-bottom: 1mm; }
+  .arch .box.accent { border-color: var(--accent); background: var(--accent-soft); }
+  .arch .arrow { display: grid; place-items: center; color: var(--muted); font: 600 14pt "JetBrains Mono"; }
+  .arch-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; margin-bottom: 4mm; }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<section class="cover">
+  <div class="logo">E</div>
+  <div class="eyebrow">Project report · Operating systems learning workbench</div>
+  <h1>ExecOS</h1>
+  <p class="tag">An operating-systems simulator, visualizer and learning platform with a live software Kernel Engine, the ExecAI assistant, and a separate bootable x86-64 kernel.</p>
+  <img class="cover-shot" src="screenshots/02-overview.jpg" alt="ExecOS overview dashboard" style="max-height:120mm;object-fit:cover;object-position:top">
+  <div class="meta">
+    <div><b>Frontend</b>React 18 · Vite</div>
+    <div><b>Backend</b>Python · FastAPI</div>
+    <div><b>Kernel</b>C · Limine · QEMU</div>
+    <div><b>Report date</b>18 November 2026</div>
+  </div>
+</section>
+
+<!-- CONTENTS -->
+<section class="toc" style="break-before: page">
+  <h1>Contents</h1>
+  <ol>
+    <li>Executive summary <span>Project at a glance</span></li>
+    <li>Architecture &amp; technology <span>How the pieces fit</span></li>
+    <li>Accounts &amp; sign-in <span>Welcome screen</span></li>
+    <li>Learn: Overview dashboard <span>Modules and live engine</span></li>
+    <li>Learn: Simulator, 12 modules <span>Visualize, lesson, quiz</span></li>
+    <li>Learn: Challenge Mode <span>Scenario practice and progress</span></li>
+    <li>Manage: Kernel Engine workbench <span>Processes, files, devices, I/O, IPC, resources</span></li>
+    <li>Inspect: System internals <span>System, interrupts, syscalls, trace, terminal</span></li>
+    <li>Tools: ExecAI &amp; Settings <span>Assistant, diagnosis, self-healing</span></li>
+    <li>Backend API reference <span>All REST endpoints</span></li>
+    <li>The x86-64 kernel <span>Freestanding C kernel under QEMU</span></li>
+    <li>Testing, quality &amp; security <span>Test suites and safeguards</span></li>
+    <li>Running the project <span>Setup commands</span></li>
+    <li>Scope, boundaries &amp; known limits <span>What it is and isn't</span></li>
+  </ol>
+</section>
+
+<!-- 1 SUMMARY -->
+<section class="chapter">
+  <div class="eyebrow">01 · Executive summary</div>
+  <h1>Project at a glance</h1>
+  <p class="lead">ExecOS is an operating-systems learning workbench. Students sign in, explore OS algorithms through step-by-step interactive visualizations, read a full concept lesson, take a 20-question quiz per topic, and practise on scenario challenges. Alongside the learning side, a live, deterministic <b>Kernel Engine</b> simulates a full operating system (processes, scheduling, memory, files, devices, IPC, resources, interrupts and system calls) that users can operate and inspect. <b>ExecAI</b> sits on top as a read-only assistant that explains, diagnoses and recommends.</p>
+  <div class="stats">
+    <div class="stat"><b>16</b><span>workbench pages across Learn, Manage, Inspect and Tools</span></div>
+    <div class="stat"><b>12</b><span>interactive learning modules with lesson and quiz</span></div>
+    <div class="stat"><b>26</b><span>step-through algorithms, plus concept labs</span></div>
+    <div class="stat"><b>240</b><span>quiz questions (20 per topic) and 12 challenges</span></div>
+    <div class="stat"><b>50</b><span>REST API endpoints (FastAPI)</span></div>
+    <div class="stat"><b>92</b><span>automated tests (73 backend, 19 algorithm)</span></div>
+    <div class="stat"><b>3</b><span>cores: React workbench, Python Engine, C kernel</span></div>
+    <div class="stat"><b>7</b><span>kernel test targets under QEMU</span></div>
+  </div>
+  <h2>Three distinct cores</h2>
+  <div class="grid2">
+    <div class="card"><h3>ExecOS Workbench (React)</h3><p>The browser application: sign-in, Learning Hub, simulator labs, Challenge Mode, Engine management and inspection pages, ExecAI console and settings.</p></div>
+    <div class="card"><h3>Kernel Engine (Python / FastAPI)</h3><p>A deterministic, in-memory software OS. It owns the process table, scheduler, memory, files, devices, IPC, resources, interrupts, syscalls and the execution trace. Restarting the backend resets it.</p></div>
+    <div class="card"><h3>ExecAI (observability layer)</h3><p>Reads Engine snapshots and trace records to explain, analyze, recommend and teach. It never changes live state without explicit user approval. Optional local LLM chat through Ollama.</p></div>
+    <div class="card"><h3>x86-64 kernel (C)</h3><p>A real freestanding kernel booted by Limine under QEMU, with a frame allocator, heap, interrupts, preemptive kernel threads, a RAM filesystem, tracing and a serial shell. Built and run separately.</p></div>
+  </div>
+  <h2>Who it is for</h2>
+  <ul>
+    <li><b>Students</b> learning operating systems: visual, step-by-step understanding plus self-testing.</li>
+    <li><b>Instructors</b>: a ready-made lab for demonstrating scheduling, memory, deadlock and file-system behaviour live.</li>
+    <li><b>Systems learners</b>: a bridge from simulated concepts to a real, bootable kernel.</li>
+  </ul>
+</section>
+
+<!-- 2 ARCHITECTURE -->
+<section class="chapter">
+  <div class="eyebrow">02 · Architecture &amp; technology</div>
+  <h1>How the pieces fit</h1>
+  <div class="arch">
+    <div class="box accent"><b>React Workbench</b>Vite dev server :5173<br>Learning Hub · Simulator · Challenges · Engine pages · ExecAI</div>
+    <div class="arrow">→</div>
+    <div class="box"><b>FastAPI backend</b>:8000 · token auth<br><code>/api/auth</code> <code>/api/kernel</code> <code>/api/intelligence</code> <code>/api/host</code> <code>/api/learning</code></div>
+    <div class="arrow">→</div>
+    <div class="box accent"><b>Kernel Engine</b>In-memory, deterministic<br>processes · scheduler · memory · VFS · devices · IPC · resources · trace</div>
+  </div>
+  <div class="arch-row2">
+    <div class="box card"><b>ExecAI + Recovery Manager</b><br>Reads fresh Engine snapshots and trace (read-only). Optimizer and What-If run real schedulers on <i>isolated copies</i>. Recovery plans run only after explicit approval and are verified afterwards.</div>
+    <div class="box card"><b>Host monitor + SQLite</b><br>Read-only host telemetry (CPU, memory, processes, I/O, uptime) through <code>psutil</code>, always labelled separately. Accounts and learning progress live in <code>backend/data/accounts.sqlite3</code>.</div>
+  </div>
+  <div class="note">The QEMU kernel is independent. Its state is not fed into the workbench Engine or ExecAI, and QEMU is not needed to use the workbench.</div>
+  <h2>Technology stack</h2>
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Key files</th></tr>
+    <tr><td>Frontend</td><td>React 18.3, Vite 8, plain CSS (no UI framework)</td><td><code>App.jsx</code>, <code>AlgorithmStudio.jsx</code>, <code>ChallengeMode.jsx</code>, <code>algorithms.js</code>, <code>theoryContent.js</code>, <code>quizQuestions.js</code></td></tr>
+    <tr><td>Backend</td><td>Python 3.11+, FastAPI, Pydantic v2, Uvicorn, psutil</td><td><code>main.py</code>, <code>kernel_engine.py</code>, <code>intelligence.py</code>, <code>analysis.py</code>, <code>recovery.py</code>, <code>auth.py</code>, <code>host.py</code>, <code>ollama_chat.py</code></td></tr>
+    <tr><td>Storage</td><td>SQLite (accounts, salted PBKDF2 hashes, learning progress)</td><td><code>backend/data/</code></td></tr>
+    <tr><td>AI (optional)</td><td>Local Ollama model, e.g. <code>qwen2.5:1.5b</code> or <code>qwen2.5:7b</code>; localhost only</td><td><code>ollama_chat.py</code></td></tr>
+    <tr><td>Kernel</td><td>Freestanding C, x86-64 assembly, Limine boot protocol, QEMU, built in WSL2</td><td><code>kernel/src/</code>, <code>GNUmakefile</code>, <code>execos.iso</code></td></tr>
+  </table>
+  <h2>Source size</h2>
+  <p>The core source is about 17,000 lines. The largest modules are the Engine (<code>kernel_engine.py</code>, 2,300 lines), the simulator studio (<code>AlgorithmStudio.jsx</code>, 1,600 lines), the workbench shell (<code>App.jsx</code>, 1,600 lines) and ExecAI (<code>intelligence.py</code>, 1,000 lines). Lesson, quiz and challenge content lives in its own data modules.</p>
+</section>
+
+<!-- 3 LOGIN -->
+<section class="chapter">
+  <div class="eyebrow">03 · Accounts &amp; sign-in</div>
+  <h1>Welcome screen</h1>
+  <figure><img src="screenshots/01-login.jpg" alt="Login and sign-up screen"><figcaption><b>Fig 1</b> Welcome screen with sign-in (left) and account creation (right), plus a light/dark theme toggle.</figcaption></figure>
+  <ul>
+    <li><b>Sign up</b> with full name, email and password (at least 10 characters, confirmed). A username is derived from the email automatically.</li>
+    <li><b>Log in</b> with email and password; "Remember me" keeps the session in local storage, otherwise it lasts for the browser session.</li>
+    <li>Passwords are stored as <b>salted PBKDF2-SHA256 hashes</b> in SQLite and compared in constant time. Sessions are bearer tokens, and every Engine, ExecAI and learning endpoint requires one.</li>
+    <li>A session is an application login only. It is not an OS user and grants no host privileges.</li>
+    <li>The Google and GitHub buttons are present in the UI as placeholders.</li>
+  </ul>
+</section>
+
+<!-- 4 OVERVIEW -->
+<section class="chapter">
+  <div class="eyebrow">04 · Learn</div>
+  <h1>Overview dashboard</h1>
+  <p>The home page after sign-in. A persistent layout frames every page: a top bar with live host stats (architecture, CPU, memory, process count, uptime) and the Engine status, a grouped side navigation (Learn, Manage, Inspect, Tools), and a status bar.</p>
+  <ul>
+    <li><b>Module launcher:</b> 12 cards, each with the algorithms it covers, that open straight into the Simulator.</li>
+    <li><b>Engine summary:</b> processes (ready/waiting), Engine memory used/free, last CPU run, and I/O queue depth.</li>
+    <li><b>Run the Engine scheduler</b> from the dashboard (policy + time quantum), with the process-state table and a Gantt timeline.</li>
+    <li><b>Host details</b> (read-only) and the <b>recent Engine events</b> feed.</li>
+  </ul>
+  <figure><img src="screenshots/02-overview.jpg" alt="Overview"><figcaption><b>Fig 2</b> Overview: the 12 module cards, Engine summary tiles, a "Current run" panel to run a CPU policy on the live Engine, host details and recent Engine events.</figcaption></figure>
+</section>
+
+<!-- 5 SIMULATOR -->
+<section class="chapter">
+  <div class="eyebrow">05 · Learn · Simulator</div>
+  <h1>Simulator: 12 interactive modules</h1>
+  <p>Each module follows the same three-step path: <b>01 Explore the simulation → 02 Understand the concept → 03 Check your understanding</b>. Algorithm labs validate custom inputs, support Start / Pause / Next step / Reset, explain every decision, show algorithm-specific visuals and metrics, and compare every policy on the same workload.</p>
+  <table>
+    <tr><th>#</th><th>Module</th><th>Algorithms / labs</th></tr>
+    <tr><td>1</td><td>CPU Scheduling</td><td>FCFS, SJF, SRTF, Priority (preemptive), Priority (non-preemptive), Round Robin</td></tr>
+    <tr><td>2</td><td>Process Synchronization</td><td>Producer–Consumer, Readers–Writers, Dining Philosophers, mutex/critical section</td></tr>
+    <tr><td>3</td><td>Disk Scheduling</td><td>FCFS, SSTF, SCAN, C-SCAN, LOOK, C-LOOK</td></tr>
+    <tr><td>4</td><td>Memory Management (contiguous)</td><td>First Fit, Best Fit, Worst Fit, Next Fit</td></tr>
+    <tr><td>5</td><td>Memory Management Techniques</td><td>Contiguous, paging, segmentation, virtual memory; MFT/MVT partitioning with compaction</td></tr>
+    <tr><td>6</td><td>Page Replacement</td><td>FIFO, LRU, Optimal, LFU, Second Chance (Clock)</td></tr>
+    <tr><td>7</td><td>Paging &amp; Segmentation</td><td>Editable page tables, segment base/limit checks, TLB and page-fault walk</td></tr>
+    <tr><td>8</td><td>Deadlock</td><td>Banker's safety algorithm, deadlock detection</td></tr>
+    <tr><td>9</td><td>File Management</td><td>Sequential, linked and indexed allocation</td></tr>
+    <tr><td>10</td><td>Hierarchical File Organization</td><td>Single-level and tree directories, path traversal</td></tr>
+    <tr><td>11</td><td>System Calls</td><td>User→kernel flow walkthrough, live Engine syscalls, fork/exec/wait/exit lifecycle (conceptual)</td></tr>
+    <tr><td>12</td><td>OS Concepts</td><td>7 guided concept visuals plus a whole-subject roadmap and reading list</td></tr>
+  </table>
+
+  <div class="feature">
+  <h2>5.1 CPU Scheduling Visualizer</h2>
+  <figure><img src="screenshots/03-sim-cpu.jpg" alt="CPU scheduling"><figcaption><b>Fig 3</b> CPU Scheduling after a full FCFS run: editable process table, a CPU and ready-queue state view, a Gantt chart, per-step explanation, average wait/turnaround/response and throughput, and a per-process result table.</figcaption></figure>
+  </div>
+  <ul>
+    <li>Editable process rows (arrival, burst, priority) with <b>Add / Remove</b>, a configurable time quantum, and input validation.</li>
+    <li>Live <b>CPU / ready-queue</b> panel and a <b>step-driven Gantt timeline</b>. "How it works · Step N" explains why each process was chosen.</li>
+    <li>Algorithm information tabs: Description, Formula, Advantages, Disadvantages and Comparison. Time and space complexity shown.</li>
+    <li><b>Compare algorithms</b> runs every policy on the same input; <b>Run on live Engine</b> runs the chosen policy on the shared Engine workload.</li>
+  </ul>
+
+  <div class="feature">
+  <h2>5.2 Concept lesson</h2>
+  <figure><img src="screenshots/04-sim-cpu-lesson.jpg" alt="Lesson"><figcaption><b>Fig 4</b> Step 02: a long-form study article with outline, overview, glossary, rules and formulas, a worked example, reasoning steps, common pitfalls and links to further reading.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.3 20-question topic quiz</h2>
+  <figure><img src="screenshots/05-sim-cpu-quiz.jpg" alt="Quiz"><figcaption><b>Fig 5</b> Step 03: 20 questions per topic, per-question feedback, a collapsible concept refresher, a live score, and a final score out of 20 saved to the account.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.4 Process Synchronization</h2>
+  <figure><img src="screenshots/06-sim-sync.jpg" alt="Synchronization"><figcaption><b>Fig 6</b> Synchronization walkthroughs (Producer–Consumer, Readers–Writers, Dining Philosophers) with Start, Pause, Previous, Next event and Reset.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.5 Disk Scheduling</h2>
+  <figure><img src="screenshots/07-sim-disk.jpg" alt="Disk scheduling"><figcaption><b>Fig 7</b> Disk-head movement chart across cylinder requests, total seek distance, step explanations and a comparison of all six policies. SCAN and C-SCAN count boundary travel and the wrap jump.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.6 Contiguous Memory Allocation</h2>
+  <figure><img src="screenshots/08-sim-contiguous.jpg" alt="Contiguous memory"><figcaption><b>Fig 8</b> First, Best, Worst and Next Fit placement into free blocks, with a block map, allocated/free totals, fragmentation and a cross-policy comparison.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.7 Memory Management Techniques</h2>
+  <figure><img src="screenshots/09-sim-memory-techniques.jpg" alt="Memory techniques"><figcaption><b>Fig 9</b> Technique picker (contiguous, paging, segmentation, virtual memory) with strengths and trade-offs, plus MFT fixed-partition and MVT variable-partition labs with release and compaction.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.8 Page Replacement</h2>
+  <figure><img src="screenshots/10-sim-page-replacement.jpg" alt="Page replacement"><figcaption><b>Fig 10</b> Frame-by-frame reference trace showing hits, faults and the victim page for FIFO, LRU, Optimal, LFU and Second Chance, with hit ratio and comparison.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.9 Paging &amp; Segmentation</h2>
+  <figure><img src="screenshots/11-sim-paging-segmentation.jpg" alt="Paging and segmentation"><figcaption><b>Fig 11</b> Address-translation labs: editable page table, segment base/limit checks, and a step-through TLB lookup and page-fault walk.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.10 Deadlock</h2>
+  <figure><img src="screenshots/12-sim-deadlock.jpg" alt="Deadlock"><figcaption><b>Fig 12</b> Banker's safety algorithm and deadlock detection: allocation, max and need matrices, the safe sequence (or blocked processes) and a step-by-step resource visualization.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.11 File Allocation</h2>
+  <figure><img src="screenshots/13-sim-file-allocation.jpg" alt="File allocation"><figcaption><b>Fig 13</b> Disk-block map showing how files are placed by sequential, linked and indexed allocation, with step explanations and a comparison.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.12 Hierarchical File Organization</h2>
+  <figure><img src="screenshots/14-sim-directories.jpg" alt="Directories"><figcaption><b>Fig 14</b> Single-level and tree directory structures with component-by-component path resolution.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.13 System Calls</h2>
+  <figure><img src="screenshots/15-sim-syscalls.jpg" alt="System calls"><figcaption><b>Fig 15</b> A request followed from user mode through kernel validation and back, a button to invoke real Engine syscalls, and a conceptual fork/exec/wait/exit lifecycle.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>5.14 OS Concepts</h2>
+  <figure><img src="screenshots/16-sim-os-concepts.jpg" alt="OS concepts"><figcaption><b>Fig 16</b> Guided concept visuals connecting processes, virtual memory, IPC, files and devices, plus a whole-subject roadmap (architecture and boot to distributed systems) linked to lessons and labs.</figcaption></figure>
+  </div>
+</section>
+
+<!-- 6 CHALLENGES -->
+<section class="chapter">
+  <div class="eyebrow">06 · Learn · Challenge Mode</div>
+  <h1>Challenge Mode &amp; saved progress</h1>
+  <ul>
+    <li><b>12 scenario challenges</b>, one per topic, rated Beginner or Intermediate, each with a hint, answer feedback, an explanation and retry.</li>
+    <li>Each card links back to its simulator ("Open CPU Scheduling simulator →").</li>
+    <li><b>Per-account progress</b> stored in SQLite: visualizer and lesson visits, quiz attempts and best scores, challenge attempts and completions (<code>GET/PUT /api/learning/progress</code>).</li>
+  </ul>
+  <figure><img src="screenshots/17-challenges.jpg" alt="Challenges"><figcaption><b>Fig 17</b> OS Challenge Mode: a "challenges cleared" counter, a per-topic Learning Journey (visualizer, lesson, quiz, challenge) and scenario cards with difficulty labels.</figcaption></figure>
+</section>
+
+<!-- 7 MANAGE -->
+<section class="chapter">
+  <div class="eyebrow">07 · Manage</div>
+  <h1>Kernel Engine workbench</h1>
+  <p>The Manage pages operate the live software Kernel Engine. Every action goes through an authenticated API, returns an updated Engine snapshot, and is recorded in the execution trace. Nothing here touches the host OS.</p>
+
+  <div class="feature">
+  <h2>7.1 Processes</h2>
+  <figure class="s"><img src="screenshots/18-processes.jpg" alt="Processes"><figcaption><b>Fig 18</b> Process table (PID, name, state, priority, burst, remaining, memory, wait reason), the READY queue, process search, and a Create Process form (name, CPU burst, priority, memory, arrival tick).</figcaption></figure>
+  </div>
+  <div class="feature">
+  <figure class="s"><img src="screenshots/19-process-detail.jpg" alt="PCB"><figcaption><b>Fig 19</b> Process Control Block drawer: state progression (NEW → READY → RUNNING → WAITING → TERMINATED), timing metrics, PC/SP, parent, <b>Dispatch / Pause / Resume / Terminate</b>, priority change, and a PID-filtered execution trace.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>7.2 File System</h2>
+  <figure class="s"><img src="screenshots/20-file-system.jpg" alt="File system"><figcaption><b>Fig 20</b> Virtual file system with read, create file, create directory, write, delete and rename operations, and a table of path, type, owner, creation tick and content.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>7.3 Devices</h2>
+  <figure class="s"><img src="screenshots/21-devices.jpg" alt="Devices"><figcaption><b>Fig 21</b> Device requests per process, plus the device ownership table (type, status, owner, IRQ) and the I/O request queue.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>7.4 I/O</h2>
+  <figure class="s"><img src="screenshots/22-io.jpg" alt="I/O"><figcaption><b>Fig 22</b> I/O request queue with queue depth and controls to complete active requests, which wakes waiting processes.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>7.5 IPC</h2>
+  <figure class="s"><img src="screenshots/23-ipc.jpg" alt="IPC"><figcaption><b>Fig 23</b> Inter-process message passing: choose sender, receiver and message, then send or receive the next message; the message table shows its status.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>7.6 Resources &amp; deadlock safety</h2>
+  <figure class="s"><img src="screenshots/24-resources.jpg" alt="Resources"><figcaption><b>Fig 24</b> Resource availability (CPU, Memory, Disk: total, available, allocated, waiting), request and release per process, and a live Banker's safety check with the safe sequence and blocked PIDs.</figcaption></figure>
+  </div>
+</section>
+
+<!-- 8 INSPECT -->
+<section class="chapter">
+  <div class="eyebrow">08 · Inspect</div>
+  <h1>System internals</h1>
+
+  <div class="feature">
+  <h2>8.1 System</h2>
+  <figure class="s"><img src="screenshots/25-system.jpg" alt="System"><figcaption><b>Fig 25</b> System view: Engine status and module overview next to separately labelled, read-only host telemetry (OS, CPU, memory, disk, uptime).</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>8.2 Interrupts</h2>
+  <figure class="s"><img src="screenshots/26-interrupts.jpg" alt="Interrupts"><figcaption><b>Fig 26</b> Trigger handled interrupts (Timer, Keyboard, Disk, I/O) for an optional process; the interrupt log shows type, PID, tick, status and details.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>8.3 System Calls</h2>
+  <figure class="s"><img src="screenshots/27-syscalls.jpg" alt="System calls"><figcaption><b>Fig 27</b> Invoke Engine system calls with JSON arguments: <code>sys_open</code>, <code>sys_read</code>, <code>sys_write</code>, <code>sys_close</code>, <code>sys_create_process</code>, <code>sys_terminate_process</code>, <code>sys_allocate_memory</code>, <code>sys_release_memory</code>. A results table records status, duration and errors.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>8.4 Execution Trace</h2>
+  <figure class="s"><img src="screenshots/28-trace.jpg" alt="Execution trace"><figcaption><b>Fig 28</b> The full Engine event log after a Round Robin run: context save and restore with registers, quantum expiry, timer interrupts, preemption and completion metrics. Filter by PID, module or exact event.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>8.5 Terminal</h2>
+  <figure class="s"><img src="screenshots/29-terminal.jpg" alt="Terminal"><figcaption><b>Fig 29</b> Engine terminal with commands <code>help</code>, <code>ps</code>, <code>memory</code>, <code>ls</code>, <code>cat</code>, <code>mkdir</code>, <code>touch</code>, <code>write</code>, <code>rm</code>, <code>schedule</code> and <code>trace</code>, all executed against the software Engine.</figcaption></figure>
+  </div>
+</section>
+
+<!-- 9 TOOLS -->
+<section class="chapter">
+  <div class="eyebrow">09 · Tools</div>
+  <h1>ExecAI &amp; Settings</h1>
+  <p>ExecAI is an <b>observability layer, not a control plane</b>. It reads Engine snapshots and trace records; diagnoses show their measured evidence; the optimizer and What-If Lab run real schedulers on isolated copies. Live state changes only when the user explicitly confirms a recommendation.</p>
+
+  <div class="feature">
+  <h2>9.1 ExecAI · Live Engine</h2>
+  <figure><img src="screenshots/30b-execai-engine.jpg" alt="ExecAI live engine"><figcaption><b>Fig 30</b> Engine-aware mode: Explain, Analyze, Recommend and Teach; suggested questions; a live kernel snapshot panel; and ExecOS Intelligence tools (Ask OS, Analyze System, Diagnose Issue, Explain Decision, Simulate What-If, Self-Heal).</figcaption></figure>
+  </div>
+  <ul>
+    <li><b>Modes:</b> OS Expert, Debug, Learning and General technical reference, with a session activity log.</li>
+    <li><b>Diagnose ExecOS:</b> deterministic rules over a fresh snapshot and trace, such as READY-queue and process-state mismatches, with a health score that discloses its coverage.</li>
+    <li><b>Self-healing Recovery Manager:</b> Detect → Analyze → Diagnose → Recommend → <b>Approve</b> → Recover → Verify. It rejects stale plans and verifies queue and CPU-owner consistency after execution.</li>
+    <li><b>Optimizer and What-If Lab:</b> compare scheduling policies on isolated Engine copies. Trend predictions use retained history and say when there is not enough of it.</li>
+  </ul>
+
+  <div class="feature">
+  <h2>9.2 ExecAI · Local AI (Ollama)</h2>
+  <figure><img src="screenshots/30-execai.jpg" alt="ExecAI local"><figcaption><b>Fig 31</b> Local AI chat backed by an Ollama model on localhost, with topic starters. Each request is grounded in a fresh read-only Engine summary. Here the status bar reports that the configured model is not installed; the app shows this honestly rather than faking an answer.</figcaption></figure>
+  </div>
+
+  <div class="feature">
+  <h2>9.3 Settings</h2>
+  <figure class="s"><img src="screenshots/31-settings.jpg" alt="Settings"><figcaption><b>Fig 32</b> Session and data sources: signed-in account, Kernel Engine status, the read-only host monitor, the optional QEMU kernel, and the AI boundary statement.</figcaption></figure>
+  </div>
+</section>
+
+<!-- 10 API -->
+<section class="chapter">
+  <div class="eyebrow">10 · Backend API reference</div>
+  <h1>REST API</h1>
+  <p>Interactive Swagger documentation is served at <code>http://127.0.0.1:8000/docs</code>. All Engine, ExecAI and learning endpoints require a bearer token.</p>
+  <table>
+    <tr><th style="width:30%">Area</th><th>Endpoints</th></tr>
+    <tr><td>Auth</td><td><code>POST /api/auth/register</code> <code>POST /api/auth/login</code> <code>GET /api/auth/me</code> <code>POST /api/auth/logout</code></td></tr>
+    <tr><td>Learning progress</td><td><code>GET /api/learning/progress</code> <code>PUT /api/learning/progress</code></td></tr>
+    <tr><td>Health</td><td><code>GET /api/health</code> <code>GET /api/v1/health</code></td></tr>
+    <tr><td>Engine core</td><td><code>GET /api/kernel/status</code> <code>GET /api/kernel/state</code> <code>GET|POST /api/kernel/processes</code> <code>POST /api/kernel/processes/{pid}/action</code></td></tr>
+    <tr><td>Scheduler</td><td><code>GET /api/kernel/scheduler</code> <code>POST /api/kernel/scheduler/run</code> (FCFS, SJF, SRTF, Priority, Round Robin)</td></tr>
+    <tr><td>Memory</td><td><code>GET /api/kernel/memory</code> <code>POST …/memory/allocate</code> <code>POST …/memory/release</code> <code>GET /api/kernel/virtual-memory</code> <code>POST …/virtual-memory/access</code> (FIFO/LRU)</td></tr>
+    <tr><td>File system</td><td><code>GET|POST /api/kernel/filesystem</code></td></tr>
+    <tr><td>Devices &amp; I/O</td><td><code>GET /api/kernel/devices</code> <code>POST …/devices/request</code> <code>POST …/devices/release</code> <code>GET /api/kernel/io</code> <code>POST …/io/complete</code></td></tr>
+    <tr><td>IPC</td><td><code>GET /api/kernel/ipc</code> <code>POST …/ipc/send</code> <code>POST …/ipc/receive</code></td></tr>
+    <tr><td>Resources &amp; deadlock</td><td><code>GET /api/kernel/resources</code> <code>POST …/resources/request</code> <code>POST …/resources/release</code> <code>POST /api/kernel/deadlocks/check</code></td></tr>
+    <tr><td>Interrupts &amp; syscalls</td><td><code>GET /api/kernel/interrupts</code> <code>POST …/interrupts/trigger</code> <code>GET|POST /api/kernel/syscalls</code></td></tr>
+    <tr><td>Terminal &amp; trace</td><td><code>POST /api/kernel/terminal</code> <code>GET /api/kernel/trace</code> (filter by pid, module, event)</td></tr>
+    <tr><td>Host (read-only)</td><td><code>GET /api/host/system</code> <code>/memory</code> <code>/processes</code> <code>/io</code> <code>/syscalls</code>; <code>GET /api/v1/memory/summary</code> <code>/memory/history</code> <code>/processes</code></td></tr>
+    <tr><td>ExecAI</td><td><code>GET /api/intelligence/insights</code> <code>POST …/query</code> <code>GET …/chat/status</code> <code>POST …/chat</code> <code>POST …/diagnose</code> <code>POST …/recovery/plan</code> <code>POST …/recovery/execute</code> <code>GET …/optimizer</code> <code>POST …/what-if</code></td></tr>
+  </table>
+  <figure><img src="screenshots/32-api-docs.jpg" alt="API docs" style="max-height:150mm"><figcaption><b>Fig 33</b> Auto-generated interactive API documentation (Swagger UI).</figcaption></figure>
+</section>
+
+<!-- 11 KERNEL -->
+<section class="chapter">
+  <div class="eyebrow">11 · The x86-64 kernel</div>
+  <h1>Freestanding kernel under QEMU</h1>
+  <p>A separate, real kernel written in freestanding C and x86-64 assembly, booted by <b>Limine</b> and run in <b>QEMU</b>. A prebuilt <code>execos.iso</code> is included in the project.</p>
+  <pre>Limine → freestanding x86-64 kernel
+       → physical-frame allocator (pmm.c) and page-backed kernel heap (heap.c)
+       → IDT, legacy PIC/PIT interrupts (idt.c, pic.c, interrupts.S)
+       → preemptive round-robin kernel threads (scheduler.c, process.c)
+       → bounded RAM filesystem (filesystem.c) and trace ring (trace.c)
+       → COM1 serial shell (shell.c, serial.c)</pre>
+  <h2>Serial shell commands</h2>
+  <p><span class="pill">help</span><span class="pill">clear</span><span class="pill">pwd</span><span class="pill">cd</span><span class="pill">ls</span><span class="pill">mkdir</span><span class="pill">touch</span><span class="pill">cat</span><span class="pill">write</span><span class="pill">rm</span><span class="pill">mv</span><span class="pill">ps</span><span class="pill">kill</span><span class="pill">memory</span><span class="pill">scheduler</span><span class="pill">trace</span><span class="pill">uname</span></p>
+  <h2>Build &amp; test (Ubuntu on WSL2)</h2>
+  <pre>sudo apt install build-essential git curl xorriso qemu-system-x86
+make            # build kernel + ISO
+make run        # boot in QEMU
+make test-memory  test-heap  test-process  test-filesystem  test-shell  test-trace  test-boot</pre>
+  <div class="note warn">Current limits: ring-0 worker threads in one shared address space. There is no ring-3 user mode, no isolated per-process address spaces, no userspace syscall ABI, no persistent filesystem, and no telemetry bridge to the GUI.</div>
+</section>
+
+<!-- 12 TESTING -->
+<section class="chapter">
+  <div class="eyebrow">12 · Testing, quality &amp; security</div>
+  <h1>Testing &amp; safeguards</h1>
+  <table>
+    <tr><th>Suite</th><th>Scope</th><th>Count</th></tr>
+    <tr><td><code>test_api.py</code></td><td>Auth, protected endpoints, Engine API, learning progress</td><td rowspan="5">73 tests (Python <code>unittest</code>)</td></tr>
+    <tr><td><code>test_kernel_engine.py</code></td><td>Scheduler policies, memory, VFS, devices, IPC, resources, syscalls, trace</td></tr>
+    <tr><td><code>test_intelligence.py</code></td><td>ExecAI diagnosis, recovery planning, optimizer, What-If isolation</td></tr>
+    <tr><td><code>test_host_memory.py</code></td><td>Read-only host telemetry</td></tr>
+    <tr><td><code>test_ollama_chat.py</code></td><td>Local model status, localhost-only endpoint, error reporting</td></tr>
+    <tr><td><code>frontend/tests/algorithms.test.js</code></td><td>Simulator algorithm correctness (Node test runner)</td><td>19 tests</td></tr>
+    <tr><td><code>kernel/tests/*.c</code></td><td>PMM, heap, process, filesystem, shell, trace, boot</td><td>7 make targets</td></tr>
+  </table>
+  <h2>Security and design safeguards</h2>
+  <ul>
+    <li>Salted PBKDF2-SHA256 password hashing with constant-time comparison; bearer-token sessions on all protected routes.</li>
+    <li>The API binds to loopback by default, and CORS is configurable through <code>EXECOS_CORS_ORIGINS</code>.</li>
+    <li>The Ollama endpoint is restricted to localhost; the assistant cannot browse the web or control the host.</li>
+    <li>Host telemetry is strictly read-only and never substituted for Engine state.</li>
+    <li>AI analysis never mutates live state; recovery requires a plan ID plus explicit approval, rejects stale plans and verifies the result.</li>
+    <li>Pydantic validation on every request body, with bounded values such as quantum ≤ 10,000 and memory ≤ 4,096 MB.</li>
+  </ul>
+</section>
+
+<!-- 13 RUN -->
+<section class="chapter">
+  <div class="eyebrow">13 · Running the project</div>
+  <h1>Setup &amp; run</h1>
+  <h3>Backend (terminal 1)</h3>
+  <pre>cd backend
+python -m pip install -r requirements.txt
+python -m uvicorn app.main:app --host 127.0.0.1 --reload</pre>
+  <h3>Frontend (terminal 2)</h3>
+  <pre>cd frontend
+npm install
+npm run dev        # open http://localhost:5173</pre>
+  <h3>Optional: local AI</h3>
+  <pre>ollama pull qwen2.5:1.5b
+$env:EXECOS_OLLAMA_MODEL = "qwen2.5:1.5b"</pre>
+  <h3>Tests and build</h3>
+  <pre>cd backend;  python -m unittest discover -s tests -v
+cd frontend; npm run test:algorithms; npm run build</pre>
+  <table>
+    <tr><th>Environment variable</th><th>Purpose</th></tr>
+    <tr><td><code>EXECOS_AUTH_DB_PATH</code></td><td>Location of the accounts SQLite database</td></tr>
+    <tr><td><code>EXECOS_CORS_ORIGINS</code></td><td>Allowed development origins</td></tr>
+    <tr><td><code>EXECOS_OLLAMA_URL</code></td><td>Ollama endpoint (default <code>http://127.0.0.1:11434</code>, localhost only)</td></tr>
+    <tr><td><code>EXECOS_OLLAMA_MODEL</code></td><td>Local model name</td></tr>
+    <tr><td><code>VITE_API_BASE_URL</code></td><td>Frontend API base URL (default: same origin via the Vite proxy)</td></tr>
+  </table>
+</section>
+
+<!-- 14 SCOPE -->
+<section class="chapter">
+  <div class="eyebrow">14 · Scope, boundaries &amp; known limits</div>
+  <h1>What ExecOS is and isn't</h1>
+  <div class="grid2">
+    <div class="card"><h3>It is</h3><ul>
+      <li>A complete OS learning path: visualize, learn, quiz, challenge.</li>
+      <li>A deterministic software OS engine you can operate and trace.</li>
+      <li>An evidence-based assistant that explains rather than guesses.</li>
+      <li>A real bootable kernel project for going deeper.</li>
+    </ul></div>
+    <div class="card"><h3>It isn't</h3><ul>
+      <li>A live QEMU guest. The Engine and the kernel are deliberately separate.</li>
+      <li>Persistent: Engine state resets when the backend restarts (accounts and progress persist).</li>
+      <li>A host controller: host data is read-only.</li>
+      <li>Fully featured in "conceptual" labs: fork, exec, wait and exit are labelled as concept-only.</li>
+    </ul></div>
+  </div>
+  <h2>Known limits observed while preparing this report</h2>
+  <ul>
+    <li>Local AI chat needs Ollama with the configured model installed; otherwise it reports the missing model (Fig 31).</li>
+    <li>The Google and GitHub sign-in buttons are UI placeholders.</li>
+    <li>The Engine supports FCFS, SJF, SRTF, Priority and Round Robin. Non-preemptive Priority exists only in the educational lab.</li>
+    <li>The kernel has no user mode or GUI bridge yet (see section 11).</li>
+  </ul>
+  <div class="note ok">All screenshots in this report were captured from the running application (frontend on :5173, backend on :8000) at 1440 px width, using a local test account.</div>
+</section>
+
+</body>
+</html>

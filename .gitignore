@@ -1,0 +1,38 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+htmlcov/
+/backend/data/*.sqlite3
+/backend/data/*.sqlite3-shm
+/backend/data/*.sqlite3-wal
+
+# Node.js
+node_modules/
+dist/
+
+# Editors and operating systems
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Limine kernel build artifacts
+/execos.iso
+/iso_root/
+/limine-binary/
+/limine-binary.tar.gz
+/kernel/.deps-obtained
+/kernel/bin/
+/kernel/obj/
+/kernel/cc-runtime/
+/kernel/freestanding-c-hdrs/
+/kernel/limine-protocol/
+
+# Local-only test credentials
+/.claude/report-test-account.txt

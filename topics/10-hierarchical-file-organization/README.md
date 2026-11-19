@@ -1,0 +1,12 @@
+# 10 · Hierarchical File Organization
+
+All the code for **Hierarchical File Organization** in one place. These are copies; the app still runs from the original files, which were not changed.
+
+| File | Contents |
+|---|---|
+| `visualizer.jsx` | React visualizer components and per-topic settings |
+| `lesson.js` | concept lesson, visualization guide and glossary |
+| `quiz.js` | the 20 quiz questions |
+| `challenge.js` | Challenge Mode scenario |
+| `engine.py` | backend Kernel Engine methods (Python) |
+| `kernel/` | x86-64 C kernel sources: filesystem/filesystem.c, filesystem/filesystem.h |
